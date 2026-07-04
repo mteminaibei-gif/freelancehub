@@ -1,0 +1,45 @@
+import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return NextResponse.json(
+      { error: 'Profile not found' },
+      { status: 404 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const updates = await request.json();
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return NextResponse.json(
+      { error: 'Failed to update profile' },
+      { status: 500 }
+    );
+  }
+}
